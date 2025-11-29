@@ -1,0 +1,191 @@
+@model UniversalIntegrationMiddleware.ViewModels.JobDetailsViewModel
+@{
+    ViewData["Title"] = "Job Details";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="display-6">Job #@Model.Id</h1>
+        <p class="text-muted">@Model.FlowName</p>
+    </div>
+    <div>
+        @if (Model.Status == UniversalIntegrationMiddleware.Models.Enums.JobStatus.Failed || Model.Status == UniversalIntegrationMiddleware.Models.Enums.JobStatus.PartialSuccess)
+        {
+            <form asp-action="RetryFailed" asp-route-id="@Model.Id" method="post" class="d-inline">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="btn btn-warning">Retry Failed Records</button>
+            </form>
+        }
+        <a asp-action="Index" class="btn btn-outline-secondary">Back to List</a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Job Summary</h5>
+            </div>
+            <div class="card-body">
+                <dl class="row mb-0">
+                    <dt class="col-sm-4">Status</dt>
+                    <dd class="col-sm-8">
+                        @switch (Model.Status)
+                        {
+                            case UniversalIntegrationMiddleware.Models.Enums.JobStatus.Success:
+                                <span class="badge bg-success">Success</span>
+                                break;
+                            case UniversalIntegrationMiddleware.Models.Enums.JobStatus.Failed:
+                                <span class="badge bg-danger">Failed</span>
+                                break;
+                            case UniversalIntegrationMiddleware.Models.Enums.JobStatus.Running:
+                                <span class="badge bg-info">Running</span>
+                                break;
+                            case UniversalIntegrationMiddleware.Models.Enums.JobStatus.Pending:
+                                <span class="badge bg-secondary">Pending</span>
+                                break;
+                            case UniversalIntegrationMiddleware.Models.Enums.JobStatus.PartialSuccess:
+                                <span class="badge bg-warning">Partial Success</span>
+                                break;
+                        }
+                    </dd>
+
+                    <dt class="col-sm-4">Flow Type</dt>
+                    <dd class="col-sm-8">
+                        <span class="badge bg-info">@Model.FlowType</span>
+                    </dd>
+
+                    <dt class="col-sm-4">Started</dt>
+                    <dd class="col-sm-8">@Model.StartedAt.ToString("g")</dd>
+
+                    <dt class="col-sm-4">Finished</dt>
+                    <dd class="col-sm-8">
+                        @if (Model.FinishedAt.HasValue)
+                        {
+                            @Model.FinishedAt.Value.ToString("g")
+                        }
+                        else
+                        {
+                            <span class="text-muted">In progress...</span>
+                        }
+                    </dd>
+
+                    <dt class="col-sm-4">Duration</dt>
+                    <dd class="col-sm-8">
+                        @if (Model.Duration.HasValue)
+                        {
+                            @if (Model.Duration.Value.TotalMinutes >= 1)
+                            {
+                                @($"{Model.Duration.Value.Minutes}m {Model.Duration.Value.Seconds}s")
+                            }
+                            else
+                            {
+                                @($"{Model.Duration.Value.Seconds}s")
+                            }
+                        }
+                        else
+                        {
+                            <span class="text-muted">-</span>
+                        }
+                    </dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Records Summary</h5>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-4">
+                        <h3>@Model.TotalRecords</h3>
+                        <small class="text-muted">Total</small>
+                    </div>
+                    <div class="col-4">
+                        <h3 class="text-success">@Model.SuccessCount</h3>
+                        <small class="text-muted">Success</small>
+                    </div>
+                    <div class="col-4">
+                        <h3 class="text-danger">@Model.FailureCount</h3>
+                        <small class="text-muted">Failed</small>
+                    </div>
+                </div>
+
+                @if (Model.TotalRecords > 0)
+                {
+                    <div class="progress mt-3" style="height: 20px;">
+                        @{
+                            var successPct = (Model.SuccessCount * 100) / Model.TotalRecords;
+                            var failurePct = (Model.FailureCount * 100) / Model.TotalRecords;
+                        }
+                        <div class="progress-bar bg-success" role="progressbar" style="width: @successPct%">@successPct%</div>
+                        <div class="progress-bar bg-danger" role="progressbar" style="width: @failurePct%">@failurePct%</div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (!string.IsNullOrEmpty(Model.ErrorMessage))
+{
+    <div class="card mb-4 border-danger">
+        <div class="card-header bg-danger text-white">
+            <h5 class="mb-0">Error Summary</h5>
+        </div>
+        <div class="card-body">
+            <p class="mb-0">@Model.ErrorMessage</p>
+        </div>
+    </div>
+}
+
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Log Entries</h5>
+        <a asp-controller="Logs" asp-action="Index" asp-route-jobId="@Model.Id" class="btn btn-sm btn-outline-primary">View All Logs</a>
+    </div>
+    <div class="card-body">
+        @if (Model.LogEntries.Any())
+        {
+            <table class="table table-sm">
+                <thead>
+                    <tr>
+                        <th>Time</th>
+                        <th>Level</th>
+                        <th>Message</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var log in Model.LogEntries)
+                    {
+                        <tr>
+                            <td>@log.CreatedAt.ToString("T")</td>
+                            <td>
+                                @switch (log.Level)
+                                {
+                                    case UniversalIntegrationMiddleware.Models.Enums.LogLevel.Info:
+                                        <span class="badge bg-info">Info</span>
+                                        break;
+                                    case UniversalIntegrationMiddleware.Models.Enums.LogLevel.Warning:
+                                        <span class="badge bg-warning">Warning</span>
+                                        break;
+                                    case UniversalIntegrationMiddleware.Models.Enums.LogLevel.Error:
+                                        <span class="badge bg-danger">Error</span>
+                                        break;
+                                }
+                            </td>
+                            <td>@log.Message</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <p class="text-muted mb-0">No log entries for this job.</p>
+        }
+    </div>
+</div>

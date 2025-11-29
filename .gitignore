@@ -1,0 +1,59 @@
+# Build results
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+
+# .NET specific
+*.user
+*.userosscache
+*.sln.docstates
+*.dll
+*.exe
+*.pdb
+*.cache
+*.rsuser
+*.suo
+*.nupkg
+
+# NuGet
+*.nuget.props
+*.nuget.targets
+packages/
+*.packages.config
+
+# Visual Studio
+.vs/
+*.vspscc
+*.vssscc
+*.sln.iml
+
+# JetBrains Rider
+.idea/
+*.sln.iml
+
+# VS Code
+.vscode/
+
+# User-specific files
+*.userprefs
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+ehthumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+*~
+
+# ASP.NET
+project.lock.json
+ScaffoldingReadMe.txt

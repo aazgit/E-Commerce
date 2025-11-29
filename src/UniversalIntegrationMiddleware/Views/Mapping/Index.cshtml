@@ -1,0 +1,62 @@
+@model UniversalIntegrationMiddleware.ViewModels.MappingListViewModel
+@{
+    ViewData["Title"] = "Mapping Templates";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="display-6">Mapping Templates</h1>
+        <p class="text-muted">Define data transformations between source and target schemas</p>
+    </div>
+    <a asp-action="Create" class="btn btn-primary">
+        <i class="bi bi-plus"></i> Create Mapping
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        @if (Model.Mappings.Any())
+        {
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Created</th>
+                        <th>Last Updated</th>
+                        <th>Flows Using</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var mapping in Model.Mappings)
+                    {
+                        <tr>
+                            <td>@mapping.Name</td>
+                            <td>@mapping.CreatedAt.ToString("d")</td>
+                            <td>@mapping.UpdatedAt.ToString("g")</td>
+                            <td>
+                                <span class="badge bg-secondary">@mapping.FlowsUsingCount flows</span>
+                            </td>
+                            <td>
+                                <div class="btn-group" role="group">
+                                    <a asp-action="Edit" asp-route-id="@mapping.Id" class="btn btn-sm btn-outline-primary">Edit</a>
+                                    <form asp-action="Delete" asp-route-id="@mapping.Id" method="post" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this mapping template?');">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" @(mapping.FlowsUsingCount > 0 ? "disabled" : "")>Delete</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <div class="text-center py-5">
+                <p class="text-muted mb-3">No mapping templates created yet.</p>
+                <a asp-action="Create" class="btn btn-primary">Create Your First Mapping</a>
+            </div>
+        }
+    </div>
+</div>

@@ -1,0 +1,68 @@
+@model UniversalIntegrationMiddleware.ViewModels.ConnectorViewModel
+@{
+    ViewData["Title"] = "Edit Connector";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <h1 class="display-6 mb-4">Edit Connector</h1>
+
+        <div class="card">
+            <div class="card-body">
+                <form asp-action="Edit" asp-route-id="@Model.Id" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" asp-for="Id" />
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                    <div class="mb-3">
+                        <label asp-for="Platform" class="form-label"></label>
+                        <select asp-for="Platform" asp-items="Model.Platforms" class="form-select">
+                        </select>
+                        <span asp-validation-for="Platform" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Name" class="form-label"></label>
+                        <input asp-for="Name" class="form-control" />
+                        <span asp-validation-for="Name" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="BaseUrl" class="form-label"></label>
+                        <input asp-for="BaseUrl" class="form-control" />
+                        <span asp-validation-for="BaseUrl" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="AccessToken" class="form-label"></label>
+                        <input asp-for="AccessToken" type="password" class="form-control" placeholder="Leave blank to keep current token" />
+                        <span asp-validation-for="AccessToken" class="text-danger"></span>
+                        <small class="text-muted">Leave blank to keep the current access token.</small>
+                    </div>
+
+                    <div class="mb-3 form-check">
+                        <input asp-for="IsActive" class="form-check-input" />
+                        <label asp-for="IsActive" class="form-check-label"></label>
+                    </div>
+
+                    @if (Model.LastSyncedAt.HasValue)
+                    {
+                        <div class="mb-3">
+                            <label class="form-label">Last Synced</label>
+                            <p class="form-control-plaintext">@Model.LastSyncedAt.Value.ToString("g")</p>
+                        </div>
+                    }
+
+                    <div class="d-flex justify-content-between">
+                        <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
