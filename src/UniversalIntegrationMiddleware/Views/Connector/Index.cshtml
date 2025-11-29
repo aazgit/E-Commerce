@@ -1,0 +1,100 @@
+@model UniversalIntegrationMiddleware.ViewModels.ConnectorListViewModel
+@{
+    ViewData["Title"] = "Connectors";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="display-6">Connectors</h1>
+        <p class="text-muted">Manage your platform connections (Shopify, Amazon, VTEX, D365)</p>
+    </div>
+    <a asp-action="Create" class="btn btn-primary">
+        <i class="bi bi-plus"></i> Add Connector
+    </a>
+</div>
+
+@if (TempData["TestResult"] != null)
+{
+    <div class="alert alert-info alert-dismissible fade show" role="alert">
+        @TempData["TestResult"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<div class="card">
+    <div class="card-body">
+        @if (Model.Connectors.Any())
+        {
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Platform</th>
+                        <th>Name</th>
+                        <th>Status</th>
+                        <th>Last Synced</th>
+                        <th>Created</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var connector in Model.Connectors)
+                    {
+                        <tr>
+                            <td>
+                                <span class="badge bg-secondary">@connector.Platform</span>
+                            </td>
+                            <td>@connector.Name</td>
+                            <td>
+                                @if (connector.IsActive)
+                                {
+                                    <span class="badge bg-success">Active</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">Inactive</span>
+                                }
+                            </td>
+                            <td>
+                                @if (connector.LastSyncedAt.HasValue)
+                                {
+                                    @connector.LastSyncedAt.Value.ToString("g")
+                                }
+                                else
+                                {
+                                    <span class="text-muted">Never</span>
+                                }
+                            </td>
+                            <td>@connector.CreatedAt.ToString("d")</td>
+                            <td>
+                                <div class="btn-group" role="group">
+                                    <a asp-action="Edit" asp-route-id="@connector.Id" class="btn btn-sm btn-outline-primary">Edit</a>
+                                    <form asp-action="TestConnection" asp-route-id="@connector.Id" method="post" class="d-inline">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-sm btn-outline-info">Test</button>
+                                    </form>
+                                    <form asp-action="ToggleStatus" asp-route-id="@connector.Id" method="post" class="d-inline">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-sm btn-outline-warning">
+                                            @(connector.IsActive ? "Deactivate" : "Activate")
+                                        </button>
+                                    </form>
+                                    <form asp-action="Delete" asp-route-id="@connector.Id" method="post" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this connector?');">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <div class="text-center py-5">
+                <p class="text-muted mb-3">No connectors configured yet.</p>
+                <a asp-action="Create" class="btn btn-primary">Add Your First Connector</a>
+            </div>
+        }
+    </div>
+</div>

@@ -1,0 +1,81 @@
+@model UniversalIntegrationMiddleware.ViewModels.CreateFlowViewModel
+@{
+    ViewData["Title"] = "Create Flow";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <h1 class="display-6 mb-4">Create Integration Flow</h1>
+
+        <div class="card">
+            <div class="card-body">
+                <form asp-action="Create" method="post">
+                    @Html.AntiForgeryToken()
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                    <div class="mb-3">
+                        <label asp-for="Name" class="form-label"></label>
+                        <input asp-for="Name" class="form-control" placeholder="e.g., Shopify → D365 Order Sync" />
+                        <span asp-validation-for="Name" class="text-danger"></span>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="SourceConnectionId" class="form-label"></label>
+                            <select asp-for="SourceConnectionId" asp-items="Model.SourceConnections" class="form-select">
+                                <option value="">-- Select Source --</option>
+                            </select>
+                            <span asp-validation-for="SourceConnectionId" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="TargetConnectionId" class="form-label"></label>
+                            <select asp-for="TargetConnectionId" asp-items="Model.TargetConnections" class="form-select">
+                                <option value="">-- Select Target --</option>
+                            </select>
+                            <span asp-validation-for="TargetConnectionId" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="FlowType" class="form-label"></label>
+                        <select asp-for="FlowType" asp-items="Model.FlowTypes" class="form-select">
+                            <option value="">-- Select Flow Type --</option>
+                        </select>
+                        <span asp-validation-for="FlowType" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="MappingTemplateId" class="form-label"></label>
+                        <select asp-for="MappingTemplateId" asp-items="Model.MappingTemplates" class="form-select">
+                            <option value="">-- No Mapping (Optional) --</option>
+                        </select>
+                        <span asp-validation-for="MappingTemplateId" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="ScheduleId" class="form-label"></label>
+                        <select asp-for="ScheduleId" asp-items="Model.Schedules" class="form-select">
+                            <option value="">-- Manual Trigger (Optional) --</option>
+                        </select>
+                        <span asp-validation-for="ScheduleId" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3 form-check">
+                        <input asp-for="IsEnabled" class="form-check-input" />
+                        <label asp-for="IsEnabled" class="form-check-label"></label>
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-primary">Create Flow</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

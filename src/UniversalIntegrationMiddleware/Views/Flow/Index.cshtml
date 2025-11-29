@@ -1,0 +1,113 @@
+@model UniversalIntegrationMiddleware.ViewModels.FlowListViewModel
+@{
+    ViewData["Title"] = "Integration Flows";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="display-6">Integration Flows</h1>
+        <p class="text-muted">Configure and manage data synchronization flows between platforms</p>
+    </div>
+    <a asp-action="Create" class="btn btn-primary">
+        <i class="bi bi-plus"></i> Create Flow
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        @if (Model.Flows.Any())
+        {
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Type</th>
+                        <th>Source → Target</th>
+                        <th>Schedule</th>
+                        <th>Status</th>
+                        <th>Last Job</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var flow in Model.Flows)
+                    {
+                        <tr>
+                            <td>
+                                <a asp-action="Details" asp-route-id="@flow.Id">@flow.Name</a>
+                            </td>
+                            <td>
+                                <span class="badge bg-info">@flow.FlowType</span>
+                            </td>
+                            <td>
+                                <small>@flow.SourceConnectionName → @flow.TargetConnectionName</small>
+                            </td>
+                            <td>
+                                <small class="text-muted">@(flow.ScheduleDescription ?? "Manual")</small>
+                            </td>
+                            <td>
+                                @if (flow.IsEnabled)
+                                {
+                                    <span class="badge bg-success">Enabled</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">Disabled</span>
+                                }
+                            </td>
+                            <td>
+                                @if (flow.LastJobStatus.HasValue)
+                                {
+                                    @switch (flow.LastJobStatus.Value)
+                                    {
+                                        case UniversalIntegrationMiddleware.Models.Enums.JobStatus.Success:
+                                            <span class="badge bg-success">Success</span>
+                                            break;
+                                        case UniversalIntegrationMiddleware.Models.Enums.JobStatus.Failed:
+                                            <span class="badge bg-danger">Failed</span>
+                                            break;
+                                        case UniversalIntegrationMiddleware.Models.Enums.JobStatus.Running:
+                                            <span class="badge bg-info">Running</span>
+                                            break;
+                                        case UniversalIntegrationMiddleware.Models.Enums.JobStatus.PartialSuccess:
+                                            <span class="badge bg-warning">Partial</span>
+                                            break;
+                                        default:
+                                            <span class="badge bg-secondary">@flow.LastJobStatus.Value</span>
+                                            break;
+                                    }
+                                }
+                                else
+                                {
+                                    <span class="text-muted">-</span>
+                                }
+                            </td>
+                            <td>
+                                <div class="btn-group" role="group">
+                                    <form asp-action="RunNow" asp-route-id="@flow.Id" method="post" class="d-inline">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-sm btn-outline-success" @(flow.IsEnabled ? "" : "disabled")>Run Now</button>
+                                    </form>
+                                    <a asp-action="Edit" asp-route-id="@flow.Id" class="btn btn-sm btn-outline-primary">Edit</a>
+                                    <form asp-action="Toggle" asp-route-id="@flow.Id" method="post" class="d-inline">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-sm btn-outline-warning">
+                                            @(flow.IsEnabled ? "Disable" : "Enable")
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <div class="text-center py-5">
+                <p class="text-muted mb-3">No integration flows configured yet.</p>
+                <a asp-action="Create" class="btn btn-primary">Create Your First Flow</a>
+            </div>
+        }
+    </div>
+</div>
